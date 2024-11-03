@@ -13,43 +13,35 @@ from wtforms.validators import DataRequired, Email, EqualTo, Length
 
 
 
-#Конфигурация
-DATABASE = '/tmp/app.py'
+# Конфигурация
+DATABASE = 'dbname=your_db user=your_user password=your_password host=localhost'
 DEBUG = True
 SECRET_KEY = 'fljahglahlvfdvln.n.xbvrea;ih3#5434343!'
 
 app = Flask(__name__)
 app.config.from_object(__name__)
-app.config.update(dict(DATABASE=os.path.join(app.root_path, 'ITAM.db')))
 
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 login_manager.login_message = 'Войдите в аккаунт для доступа к закрытым страницам'
 
-
 @login_manager.user_loader
 def load_user(user_id):
-    print('load_user')
     return UserLogin().fromDB(user_id, dbase)
 
-
-#Функции для взаимодействия с БД
+# Функции для взаимодействия с БД
 def connect_db():
-    conn = sqlite3.connect(app.config['DATABASE'])
-    conn.row_factory = sqlite3.Row
+    conn = psycopg2.connect(DATABASE, cursor_factory=DictCursor)
     return conn
 
 def create_db():
-    db = connect_db()
-    with app.open_resource('sq_db.sql', mode='r') as f:
-        db.cursor().executescript(f.read())
-    db.commit()
-    db.close()
+    with app.open_resource('sq_db.sql', mode='r') as f, connect_db() as db:
+        db.cursor().execute(f.read())
+        db.commit()
 
 def get_db():
     if not hasattr(g, 'link_db'):
         g.link_db = connect_db()
-    
     return g.link_db
 
 @app.teardown_appcontext
@@ -57,8 +49,7 @@ def close_db(error):
     if hasattr(g, 'link_db'):
         g.link_db.close()
 
-
-#Перед каждым запоросом будет выполнена эта функция
+# Перед каждым запросом будет выполнена эта функция
 dbase = None
 @app.before_request
 def before_request():
