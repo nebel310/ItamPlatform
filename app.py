@@ -14,7 +14,7 @@ from wtforms.validators import DataRequired, Email, EqualTo, Length
 
 
 # Конфигурация
-DATABASE = 'dbname=ITAM_db user=admin password=123456 host=localhost'
+#DATABASE = 'dbname=ITAM_db user=admin password=123456 host=localhost'
 DEBUG = True
 SECRET_KEY = 'fljahglahlvfdvln.n.xbvrea;ih3#5434343!'
 
@@ -31,7 +31,14 @@ def load_user(user_id):
 
 # Функции для взаимодействия с БД
 def connect_db():
-    conn = psycopg2.connect(DATABASE, cursor_factory=DictCursor)
+    conn = psycopg2.connect(
+        dbname="itam_db",      # Имя вашей базы данных
+        user="postgres",          # Имя пользователя PostgreSQL
+        password="123456",     # Пароль пользователя PostgreSQL
+        host="localhost",      # Хост, на котором работает PostgreSQL
+        port="5432",           # Порт (по умолчанию 5432)
+        cursor_factory=DictCursor
+    )
     return conn
 
 def create_db():
