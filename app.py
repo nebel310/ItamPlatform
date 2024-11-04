@@ -14,7 +14,7 @@ from wtforms.validators import DataRequired, Email, EqualTo, Length
 
 
 # Конфигурация
-DATABASE = 'dbname=your_db user=your_user password=your_password host=localhost'
+DATABASE = 'dbname=ITAM_db user=admin password=123456 host=localhost'
 DEBUG = True
 SECRET_KEY = 'fljahglahlvfdvln.n.xbvrea;ih3#5434343!'
 
