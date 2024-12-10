@@ -48,7 +48,7 @@ def login():
 
 @auth_blueprint.route('/get_users', methods=['GET'])
 def get_users():
-    users = Event.query.all()
+    users = User.query.all()
     return jsonify([{
         'id': user.id,
         'username': user.username,
