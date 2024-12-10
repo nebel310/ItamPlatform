@@ -1,0 +1,9 @@
+Project/
+--backend/
+----app.py
+----models.py
+----auth/routes.py
+----events/routes.py
+----static/swagger.json
+----Dockerfile
+--docker-compose.yml
