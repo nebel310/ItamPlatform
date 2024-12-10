@@ -13,6 +13,9 @@ RUN pip install -r requirements.txt
 # Копируем весь код приложения
 COPY . .
 
+# Убедитесь, что alembic.ini находится в корне контейнера
+COPY backend/migrations/alembic.ini alembic.ini
+
 # Открываем порт для приложения
 EXPOSE 5001
 
