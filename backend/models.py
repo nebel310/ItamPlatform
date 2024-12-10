@@ -35,6 +35,7 @@ class Event(db.Model):
     participant_limit = db.Column(db.Integer)
     category_id = db.Column(db.Integer, db.ForeignKey('categories.id'))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    is_cancelled = db.Column(db.Boolean, default=False)
 
     category = db.relationship('Category', backref='events')
     tags = db.relationship('Tag', secondary='event_tags', backref='events')
@@ -63,3 +64,23 @@ class EventFile(db.Model):
     file_data = db.Column(db.Text)
     file_type = db.Column(db.String(50), nullable=False)
     uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class EventParticipant(db.Model):
+    __tablename__ = 'event_participants'
+    id = db.Column(db.Integer, primary_key=True)
+    event_id = db.Column(db.Integer, db.ForeignKey('events.id', ondelete='CASCADE'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user_data.id', ondelete='CASCADE'), nullable=False)
+    registration_time = db.Column(db.DateTime, default=datetime.utcnow)
+
+    event = db.relationship('Event', backref='participants')
+    user = db.relationship('User', backref='registered_events')
+
+class EventWaitlist(db.Model):
+    __tablename__ = 'event_waitlist'
+    id = db.Column(db.Integer, primary_key=True)
+    event_id = db.Column(db.Integer, db.ForeignKey('events.id', ondelete='CASCADE'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user_data.id', ondelete='CASCADE'), nullable=False)
+    registration_time = db.Column(db.DateTime, default=datetime.utcnow)
+
+    event = db.relationship('Event', backref='waitlist')
+    user = db.relationship('User', backref='waitlist_events')

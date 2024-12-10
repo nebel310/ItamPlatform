@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from models import Event, Category, Tag, EventTag, EventFile, db
+from models import db, Event, Category, Tag, EventTag, EventFile, EventParticipant, EventWaitlist
 
 
 
@@ -288,3 +288,58 @@ def delete_tag(tag_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
+
+
+@events_blueprint.route('/register_event/<int:event_id>/<int:user_id>', methods=['POST'])
+def register_event(event_id, user_id):
+    event = Event.query.get(event_id)
+    if not event:
+        return jsonify({'error': 'Мероприятие не найдено'}), 404
+
+    if event.is_cancelled:
+        return jsonify({'error': 'Мероприятие отменено'}), 400
+
+    # Проверка лимита участников
+    participant_count = EventParticipant.query.filter_by(event_id=event_id).count()
+    if event.participant_limit and participant_count >= event.participant_limit:
+        # Добавляем в очередь
+        waitlist = EventWaitlist(event_id=event_id, user_id=user_id)
+        db.session.add(waitlist)
+        db.session.commit()
+        return jsonify({'message': 'Лимит участников достигнут. Вы добавлены в очередь'}), 200
+
+    # Регистрируем пользователя
+    participant = EventParticipant(event_id=event_id, user_id=user_id)
+    db.session.add(participant)
+    db.session.commit()
+    return jsonify({'message': 'Вы успешно зарегистрированы на мероприятие'}), 201
+
+
+@events_blueprint.route('/unregister_event/<int:event_id>/<int:user_id>', methods=['DELETE'])
+def unregister_event(event_id, user_id):
+    participant = EventParticipant.query.filter_by(event_id=event_id, user_id=user_id).first()
+    if not participant:
+        return jsonify({'error': 'Вы не зарегистрированы на это мероприятие'}), 404
+
+    db.session.delete(participant)
+
+    # Проверяем очередь
+    waitlist = EventWaitlist.query.filter_by(event_id=event_id).order_by('registration_time').first()
+    if waitlist:
+        new_participant = EventParticipant(event_id=event_id, user_id=waitlist.user_id)
+        db.session.add(new_participant)
+        db.session.delete(waitlist)
+
+    db.session.commit()
+    return jsonify({'message': 'Вы отменили регистрацию на мероприятие'}), 200
+
+
+@events_blueprint.route('/cancel_event/<int:event_id>', methods=['PUT'])
+def cancel_event(event_id):
+    event = Event.query.get(event_id)
+    if not event:
+        return jsonify({'error': 'Мероприятие не найдено'}), 404
+
+    event.is_cancelled = True
+    db.session.commit()
+    return jsonify({'message': 'Мероприятие отменено'}), 200

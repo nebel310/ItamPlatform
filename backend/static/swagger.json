@@ -515,6 +515,100 @@
           }
         }
       }
+    },
+    "/api/events/register_event/{event_id}/{user_id}": {
+      "post": {
+        "summary": "Register a user for an event",
+        "description": "Registers a user for an event. If the participant limit is reached, the user is added to the waitlist.",
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "User registered successfully"
+          },
+          "200": {
+            "description": "User added to the waitlist"
+          },
+          "404": {
+            "description": "Event not found"
+          },
+          "400": {
+            "description": "Event is cancelled"
+          }
+        }
+      }
+    },
+    "/api/events/unregister_event/{event_id}/{user_id}": {
+      "delete": {
+        "summary": "Unregister a user from an event",
+        "description": "Unregisters a user from an event. If there is a waitlist, the first user in the waitlist is automatically registered.",
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User unregistered successfully"
+          },
+          "404": {
+            "description": "User not registered for the event"
+          }
+        }
+      }
+    },
+    "/api/events/cancel_event/{event_id}": {
+      "put": {
+        "summary": "Cancel an event",
+        "description": "Marks an event as cancelled without deleting it.",
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Event cancelled successfully"
+          },
+          "404": {
+            "description": "Event not found"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -657,6 +751,42 @@
         "type": "object",
         "properties": {
           "name": {"type": "string"}
+        }
+      },
+      "EventParticipant": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "event_id": {
+            "type": "integer"
+          },
+          "user_id": {
+            "type": "integer"
+          },
+          "registration_time": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "EventWaitlist": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "event_id": {
+            "type": "integer"
+          },
+          "user_id": {
+            "type": "integer"
+          },
+          "registration_time": {
+            "type": "string",
+            "format": "date-time"
+          }
         }
       }
     }
