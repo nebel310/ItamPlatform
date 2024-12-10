@@ -5,7 +5,6 @@ from models import db
 from events.routes import events_blueprint
 from auth.routes import auth_blueprint
 from flask_swagger_ui import get_swaggerui_blueprint
-from flask_migrate import Migrate
 
 app = Flask(__name__)
 CORS(app)
@@ -15,7 +14,6 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'postgresql://
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
-migrate = Migrate(app, db)
 
 with app.app_context():
     db.create_all()
