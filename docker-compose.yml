@@ -1,5 +1,4 @@
 version: '3.9'
-
 services:
   web:
     build: ./backend
@@ -13,8 +12,9 @@ services:
         condition: service_healthy
     volumes:
       - ./backend:/app
-    command: sh -c "alembic upgrade head && python app.py"
-  
+    command: sh -c "sleep 10 && alembic upgrade head && python app.py"
+    restart: always
+
   db:
     image: postgres:17.2
     container_name: postgres_db
@@ -31,6 +31,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    restart: always
 
 volumes:
   postgres_data:
